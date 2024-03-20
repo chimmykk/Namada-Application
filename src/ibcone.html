@@ -1,0 +1,169 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Enter your IBC channel</title>
+    <link href="./output.css" rel="stylesheet">
+
+    <style>
+        /* Styles for button and other elements */
+        body {
+            background-color: black;
+            color: yellow;
+        }
+
+        h1 {
+            text-align: center;
+        }
+
+        form {
+            text-align: center;
+            margin-top: 20px;
+        }
+
+        input[type="text"] {
+            padding: 8px;
+            border-radius: 5px;
+            border: 1px solid cyan;
+            width: 200px;
+            background: transparent;
+            color: cyan;
+            outline: none;
+            margin-bottom: 10px;
+        }
+
+        button[type="submit"], button#continueButton {
+            padding: 10px 20px;
+            background-color: yellow;
+            color: black;
+            border: none;
+            margin-bottom: 4px;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+
+        textarea {
+            width: 100%;
+            border: 1px solid cyan;
+            border-radius: 5px;
+            padding: 8px;
+            margin-top: 20px;
+            background-color: black;
+        }
+
+        /* Styles for loading indicator */
+        #loadingIndicator {
+            text-align: center;
+            display: none;
+            margin-top: 20px;
+        }
+    </style>
+</head>
+<body>
+    <h1>Enter your IBC channel</h1>
+
+    <form id="ibcForm">
+        <label for="channelInput">Enter your IBC channel:</label>
+        <input type="text" id="channelInput" value="channel-0">
+        <br>
+        <button type="submit">Fetch Memo</button>
+    </form>
+
+    <!-- Loading indicator -->
+    <div id="loadingIndicator">
+        <p>Loading...</p>
+    </div>
+
+    <!-- Add a textarea to display terminal output -->
+    <textarea id="terminalOutput" rows="10" cols="50" readonly></textarea>
+
+    <button id="continueButton" onclick="continueNext()">Continue Next</button>
+
+
+    <script src="./store.js"></script>
+    <script>
+        // Function to show the loading indicator
+        function showLoadingIndicator() {
+            document.getElementById('loadingIndicator').style.display = 'block';
+        }
+
+        // Function to hide the loading indicator
+        function hideLoadingIndicator() {
+            document.getElementById('loadingIndicator').style.display = 'none';
+        }
+
+        // Function to continue next if textarea has value
+        function continueNext() {
+            const terminalOutput = document.getElementById('terminalOutput').value;
+            if (terminalOutput.trim() !== '') {
+                window.location.href = "./ibcselectspend.html"; // Redirect to ind.html
+            } else {
+                alert('Please click fetch memo wait for the terminal output to appear.');
+            }
+        }
+
+        // Form submission event listener
+        document.getElementById('ibcForm').addEventListener('submit', (event) => {
+            event.preventDefault(); // Prevent default form submission
+
+            // Show loading indicator when the form is submitted
+            showLoadingIndicator();
+
+            // Get the entered IBC channel
+            const channelInput = document.getElementById('channelInput').value;
+
+            // Store the entered IBC channel
+            setIBCChannel(channelInput);
+
+            // Log the stored IBC channel
+            console.log('Stored IBC Channel:', channelInput);
+            const os = require('os');
+
+const username = os.userInfo().username;
+console.log('Username:', username);
+
+// Ensure the output directory exists
+const outputpath = `/Users/${username}/Desktop/memodata`;
+console.log('Output path:', outputpath);
+
+            // const fs = require('fs');
+            // if (!fs.existsSync(outputpath)) {
+            //     fs.mkdirSync(outputpath, { recursive: true });
+            // }
+
+            // Construct and execute the namada command
+            const paymentAddress = getPaymentAddress();
+            const amount = getAmount();
+            const command = `namada client ibc-gen-shielded --target ${paymentAddress} --token NAAN --amount ${amount} --output-folder-path ${outputpath} --channel-id ${channelInput} --node https://semjjonline.xyz`;
+
+            // Communicate with the main process to execute the terminal command
+            const { ipcRenderer } = require('electron');
+            ipcRenderer.send('executeTerminalCommand', command);
+        });
+
+        // IPC communication with the main process to receive terminal output
+        const { ipcRenderer } = require('electron');
+        ipcRenderer.on('terminalCommandOutput', (event, output) => {
+            // Hide loading indicator when terminal output is received
+            hideLoadingIndicator();
+
+            // Extract memo name from the output
+            const toIndex = output.indexOf('to');
+            if (toIndex !== -1) {
+                const memo = output.substring(toIndex + 3).trim(); // Extracting from 'to' onwards and trimming whitespace
+                // Store memo details in local storage
+                setMemoDetails(memo);
+            }
+            function getMemoDetails() {
+    return localStorage.getItem('memodetails');
+}
+
+const test = getMemoDetails()
+console.log('the ddetails is', test)
+            // Display the output in the textarean
+            document.getElementById('terminalOutput').value = output;
+        });
+    </script>
+</body>
+</html>

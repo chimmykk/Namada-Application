@@ -1,0 +1,158 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Perform Transaction using existing Wallets</title>
+    <link href="./output.css" rel="stylesheet">
+
+    <style>
+        /* Styles for button and other elements */
+        .button-like {
+            padding: 10px 20px;
+            background-color: yellow;
+            color: black;
+            border: none;
+            margin-bottom: 4px;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+
+        .output-container {
+            background-color: black;
+            color: yellow;
+            padding: 12px;
+            width: 100vw;
+            height: 70%;
+            margin-bottom: 6px;
+            text-wrap: wrap;
+            margin: 6px;
+            overflow: auto;
+            display: none;
+            font-size: 1rem;
+        }
+
+        #addressInput {
+            color: cyan;
+            display: none;
+            margin-top: 20px;
+            text-align: center;
+        }
+
+        #addressInput label {
+            display: block;
+            margin-bottom: 10px;
+        }
+
+        #addressInput input[type="number"] {
+            padding: 8px;
+            border-radius: 5px;
+            border: 1px solid cyan;
+            width: 200px;
+            background: transparent;
+            color: cyan;
+            outline: none;
+        }
+
+        #selectedAddressText {
+            display: none;
+        }
+    </style>
+</head>
+<body style="background-color: black;">
+    <script src="store.js"></script>
+    <h1 class="text">Perform Transaction using existing Wallets</h1>
+    <button id="walletListButton" class="button-like">Select the payment address</button>
+
+    <div id="output-container" class="output-container">
+        <h1 id="output"></h1>
+    </div>
+
+    <div id="addressInput">
+        <label for="addressNumber">Enter the number of the wallet:</label>
+        <input type="number" id="addressNumber" name="addressNumber">
+    </div>
+
+    <p id="selectedAddressText">You have selected: <span id="selectedAddress"></span></p>
+
+    <!-- Initially hide the "Select and Continue" button -->
+    <button id="continueButton" class="button-like" style="display: none;">Select and Continue</button>
+
+    <button id="goBackButton" class="button-like" onclick="redirectToIndex()">Go Back</button>
+
+    <script>
+        let paymentAddress = '';
+
+        function redirectToIndex() {
+            window.location.href = "./index.html";
+        }
+
+        const { ipcRenderer } = require('electron');
+
+        // Function to show wallet list and hide other elements
+        const showWalletList = (data) => {
+            const paymentKeys = extractPaymentKeys(data);
+            document.getElementById('output').innerText = paymentKeys;
+            document.getElementById('walletListButton').style.display = 'none';
+            document.getElementById('goBackButton').style.display = 'block';
+            document.getElementById('output-container').style.display = 'block';
+            document.getElementById('addressInput').style.display = 'block';
+            document.getElementById('continueButton').style.display = 'block'; // Hide the button
+
+        };
+
+        // Function to go back to main page
+        const goBack = () => {
+            document.getElementById('output').innerText = '';
+            document.getElementById('goBackButton').style.display = 'none';
+            document.getElementById('walletListButton').style.display = 'block';
+            document.getElementById('addressInput').style.display = 'none';
+            document.getElementById('continueButton').style.display = 'none'; // Hide the button
+        };
+
+        ipcRenderer.on('walletList', (event, data) => {
+            showWalletList(data);
+        });
+
+        document.getElementById('walletListButton').addEventListener('click', () => {
+      document.getElementById('walletListButton').innerText = 'Loading...';
+      document.getElementById('walletListButton').disabled = true; // Disable the button until data is ready
+      ipcRenderer.send('executeWalletList');
+    });
+
+
+        // Combined functionality for "Set" and "Continue" button
+        document.getElementById('continueButton').addEventListener('click', () => {
+            const addressNumber = parseInt(document.getElementById('addressNumber').value);
+            const addresses = document.getElementById('output').innerText.split('\n');
+            if (addressNumber >= 1 && addressNumber <= addresses.length) {
+                paymentAddress = addresses[addressNumber - 1].split(' ')[1];
+                setPaymentAddress(paymentAddress);
+                document.getElementById('selectedAddress').innerText = paymentAddress;
+                document.getElementById('selectedAddressText').style.display = 'block';
+                window.location.href = "./transaction.html"; // Redirect to transaction page
+            } else {
+                alert('Invalid address number.');
+            }
+        });
+
+        // Function to extract payment keys
+        function extractPaymentKeys(data) {
+    const regex = /Known payment addresses:\s*((?:"[^"]+":\s*z\w+\s*)+)/g;
+    let match;
+    let enumeration = 1;
+    const keys = [];
+    while ((match = regex.exec(data)) !== null) {
+        const addresses = match[1].split("\n").filter(Boolean);
+        addresses.forEach(address => {
+            const [alias, paymentAddress] = address.trim().split(":").map(str => str.replace(/"/g, ''));
+            keys.push(`${enumeration}. ${alias.trim()}`);
+            enumeration++;
+        });
+    }
+    return keys.join('\n');
+}
+    </script>
+</body>
+</html>

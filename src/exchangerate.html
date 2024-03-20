@@ -1,0 +1,161 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Exchange Transaction</title>
+    <link href="./output.css" rel="stylesheet">
+
+    <style>
+        body {
+            background-color: black;
+            color: yellow;
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+        }
+
+        h1 {
+            text-align: center;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 10px;
+        }
+
+        input[type="text"] {
+            padding: 8px;
+            border-radius: 5px;
+            border: 1px solid cyan;
+            width: 200px;
+            background: transparent;
+            color: cyan;
+            outline: none;
+            margin-bottom: 10px;
+        }
+
+        button {
+            padding: 10px 20px;
+            background-color: yellow;
+            color: black;
+            border: none;
+            margin-bottom: 10px;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+
+        #NAANPRICE, #atom-to-receive, #exchange-rate, #swap-response, #details-response, #final-response {
+            margin-top: 20px;
+            padding: 10px;
+            border: 1px solid cyan;
+            border-radius: 5px;
+            color: yellow;
+        }
+    </style>
+    <script src="store.js"></script> <!-- Assume store.js correctly defines localStorage interactions -->
+    <script>
+        var exchangeRate; // Declare exchangeRate globally to ensure accessibility
+
+        function getAmount() {
+            return localStorage.getItem('amount'); // Assume this correctly fetches the stored amount
+        }
+
+        function fetchAtomPriceAndCalculate() {
+            var naanAmount = parseFloat(getAmount()) * 2; // NAAN value logic
+
+            var xhrPrice = new XMLHttpRequest();
+            xhrPrice.open('GET', 'http://swap.semjjonline.xyz:4000/atom-price', true);
+            xhrPrice.onreadystatechange = function () {
+                if (xhrPrice.readyState === 4 && xhrPrice.status === 200) {
+                    var atomPriceJSON = JSON.parse(xhrPrice.responseText);
+                    var atomPrice = atomPriceJSON.price;
+
+                    exchangeRate = naanAmount / atomPrice;
+
+                    document.getElementById('atom-to-receive').textContent = 'Minimum amount of Atom to receive: ' + exchangeRate.toFixed(2) + ' Atom';
+                    document.getElementById('exchange-rate').textContent = 'Exchange Rate: ' + getAmount() + ' NAAN = ' + exchangeRate.toFixed(2) + ' Atom';
+                    document.getElementById('NAANPRICE').textContent = 'Exchange Rate: 1 NAAN = $2';
+                }
+            };
+            xhrPrice.send();
+        }
+
+        function initiateSwap() {
+            var receivingAddress = document.getElementById('receiving-address').value;
+            var jsonPayload = JSON.stringify({
+                swapAmount: Math.round(exchangeRate),
+                receiverAddress: receivingAddress
+            });
+
+            var xhr1 = new XMLHttpRequest();
+            xhr1.open('POST', 'http://swap.semjjonline.xyz:4000/swap', true);
+            xhr1.setRequestHeader('Content-Type', 'application/json');
+            xhr1.onreadystatechange = function () {
+                if (xhr1.readyState === 4 && xhr1.status === 200) {
+                    document.getElementById('swap-response').textContent = 'Swap initiated successfully: ' + xhr1.responseText;
+                    console.log('Swap initiated successfully');
+                    getTransactionDetails(jsonPayload); // Proceed to get transaction details
+                } else if (xhr1.readyState === 4) {
+                    console.error('Error initiating swap:', xhr1.responseText);
+                }
+            };
+            xhr1.send(jsonPayload);
+        }
+
+        function getTransactionDetails(jsonPayload) {
+            var xhr2 = new XMLHttpRequest();
+            xhr2.open('POST', 'http://swap.semjjonline.xyz:4000/getdetails', true);
+            xhr2.setRequestHeader('Content-Type', 'application/json');
+            xhr2.onreadystatechange = function () {
+                if (xhr2.readyState === 4 && xhr2.status === 200) {
+                    document.getElementById('details-response').textContent = 'Transaction details: ' + xhr2.responseText;
+                    console.log('Transaction details received successfully');
+                    finalTransaction(jsonPayload); // Automatically proceed to final transaction
+                } else if (xhr2.readyState === 4) {
+                    console.error('Error getting transaction details:', xhr2.responseText);
+                }
+            };
+            xhr2.send(jsonPayload);
+        }
+
+        function finalTransaction(jsonPayload) {
+    var details = JSON.parse(jsonPayload);
+
+    // Create a new payload that matches the server's expected format
+    var adjustedPayload = JSON.stringify({
+        receiver: details.receiverAddress, // Map receiverAddress to receiver
+        amount: details.swapAmount // Ensure this matches the expected format for amount
+    });
+
+    var xhr3 = new XMLHttpRequest();
+    xhr3.open('POST', 'http://swap.semjjonline.xyz:3500/finalltxn', true);
+    xhr3.setRequestHeader('Content-Type', 'application/json');
+    xhr3.onreadystatechange = function () {
+        if (xhr3.readyState === 4 && xhr3.status === 200) {
+            document.getElementById('final-response').textContent = 'Final transaction completed successfully: ' + xhr3.responseText;
+            console.log('Final transaction completed successfully');
+        } else if (xhr3.readyState === 4) {
+            console.error('Error completing final transaction:', xhr3.responseText);
+        }
+    };
+    xhr3.send(adjustedPayload); // Send the adjusted payload
+}
+
+    </script>
+</head>
+<body onload="fetchAtomPriceAndCalculate()">
+    <div id="NAANPRICE"></div>
+    <div id="atom-to-receive"></div>
+    <div id="exchange-rate"></div>
+    <h1>Exchange Transaction</h1>
+    <label for="receiving-address">Receiving Address:</label>
+    <input type="text" id="receiving-address" name="receiving-address">
+    <br>
+    <button onclick="initiateSwap()">Initiate Swap</button>
+    <div id="swap-response"></div>
+    <div id="details-response"></div>
+    <div id="final-response"></div>
+</body>
+</html>

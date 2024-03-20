@@ -1,0 +1,197 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Perform Transaction using existing Wallets</title>
+    <style>
+        body {
+            background-color: black;
+            color: yellow;
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+        }
+
+        h1 {
+            text-align: center;
+        }
+
+        p, label {
+            text-align: center;
+            color: yellow;
+        }
+
+        input[type="number"] {
+            padding: 8px;
+            border-radius: 5px;
+            border: 1px solid cyan;
+            width: 300px;
+            background: transparent;
+            color: cyan;
+            outline: none;
+            margin-bottom: 10px;
+        }
+
+        .button-like {
+            display: inline-block;
+            padding: 10px 20px;
+            background-color: yellow;
+            color: black;
+            border: none;
+            border-radius: 5px;
+            text-decoration: none;
+            cursor: pointer;
+            margin-bottom: 10px; /* Add margin bottom for spacing */
+        }
+
+        .button-like:hover {
+            background-color: #ff0;
+        }
+
+        #output {
+            color: yellow;
+            background-color: #000;
+            border: 1px solid #ccc;
+            padding: 10px;
+            border-radius: 5px;
+            margin-bottom: 10px;
+            overflow-y: scroll;
+            height: 200px;
+        }
+
+        #addressInput {
+            display: none;
+        }
+
+        #selectedAddressText {
+            display: none;
+        }
+
+        #continueTransactionButton {
+            display: none;
+        }
+
+        #goBackButton {
+            display: none;
+        }
+    </style>
+</head>
+<body>
+    <h1>Initiating your txn</h1>
+    <button id="walletListButton" class="button-like">Select the spending address </button>
+
+    <pre id="output"></pre>
+
+    <div id="addressInput">
+        <label for="addressNumber">Enter the number of the wallet:</label>
+        <input type="number" id="addressNumber" name="addressNumber">
+        <button id="continueButton" class="button-like">Set</button>
+    </div>
+
+    <p id="selectedAddressText">You have selected: <span id="selectedAddress"></span></p>
+    <button id="continueTransactionButton" class="button-like">Continue</button>
+    <br>
+    <button id="goBackButton"  class="button-like" onclick="redirectToIndex()">Go Back</button>
+
+
+    <script src="./store.js"></script>
+    <script>
+        function redirectToIndex() {
+            window.location.href = "./shield-naan0.html";
+        }
+
+        // Function to show wallet list and hide other elements
+        const showWalletList = (data) => {
+            const paymentKeys = extractPaymentKeys(data);
+            document.getElementById('output').innerText = paymentKeys;
+            document.getElementById('walletListButton').style.display = 'none';
+            document.getElementById('goBackButton').style.display = 'block';
+            document.getElementById('addressInput').style.display = 'block';
+            const walletOperationsElement = document.getElementById('walletOperations');
+            if (walletOperationsElement) {
+                walletOperationsElement.style.display = 'none';
+            }
+        };
+
+        // Function to go back to main page
+        const goBack = () => {
+            document.getElementById('output').innerText = '';
+            document.getElementById('goBackButton').style.display = 'none';
+            document.getElementById('walletListButton').style.display = 'block';
+            document.getElementById('addressInput').style.display = 'none';
+            const walletOperationsElement = document.getElementById('walletOperations');
+            if (walletOperationsElement) {
+                walletOperationsElement.style.display = 'block';
+            }
+        };
+
+        // Handle IPC event for wallet list
+        const { ipcRenderer } = require('electron');
+        ipcRenderer.on('walletList', (event, data) => {
+            showWalletList(data);
+        });
+
+        // Event listener for fetching wallet list
+        document.getElementById('walletListButton').addEventListener('click', () => {
+      document.getElementById('walletListButton').innerText = 'Loading...';
+      document.getElementById('walletListButton').disabled = true; // Disable the button until data is ready
+      ipcRenderer.send('executeWalletList');
+    });
+
+
+        // Store selected payment address as spending address
+        document.getElementById('continueButton').addEventListener('click', () => {
+            const addressNumber = parseInt(document.getElementById('addressNumber').value);
+            const addresses = document.getElementById('output').innerText.split('\n');
+            if (addressNumber >= 1 && addressNumber <= addresses.length) {
+                const spendingAddress = addresses[addressNumber - 1].split(' ')[1];
+                console.log('Selected Spending Address:', spendingAddress);
+                setSpendingAddress(spendingAddress); // Store spending address
+                document.getElementById('selectedAddress').innerText = spendingAddress;
+                document.getElementById('selectedAddressText').style.display = 'block';
+                document.getElementById('continueTransactionButton').style.display = 'block'; // Show continue button
+            } else {
+                alert('Invalid address number.');
+            }
+        });
+
+        // Redirect to selectpending.html to continue transaction
+        document.getElementById('continueTransactionButton').addEventListener('click', () => {
+            window.location.href = "./amountforshield.html";
+        });
+
+        // Function to extract payment keys
+        function extractPaymentKeys(data) {
+    const regex = /Alias "(.*?)" \(encrypted\):\s+Viewing Key: z\w+/g;
+    let enumeration = 1;
+    const keys = [];
+    const aliases = data.match(regex);
+    if (aliases) {
+        aliases.forEach(aliasMatch => {
+            const alias = aliasMatch.replace(/Alias "(.*?)" \(encrypted\):\s+Viewing Key: z\w+/, '$1');
+            keys.push(`${enumeration}. ${alias}`);
+            enumeration++;
+        });
+    }
+    return keys.join('\n');
+}
+
+        // Function to set spending address in local storage
+        function setSpendingAddress(address) {
+            localStorage.setItem('spendingAddress', address);
+        }
+
+        // Function to get spending address from local storage
+        function getSpendingAddress() {
+            return localStorage.getItem('spendingAddress');
+        }
+
+        // Function to clear spending address from local storage
+        function clearSpendingAddress() {
+            localStorage.removeItem('spendingAddress');
+        }
+    </script>
+</body>
+</html>
+

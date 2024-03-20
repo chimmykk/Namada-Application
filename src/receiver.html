@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+</head>
+<body>
+    <h1>This is the receiving address wallet input</h1>
+
+
+    <form id="receiverForm">
+        <label for="receiverAddressInput">Enter receiver address:</label>
+        <input type="text" id="receiverAddressInput">
+        <br>
+        <button type="submit">Submit</button>
+    </form>
+
+    <script src="./store.js"></script>
+    <script>
+        // Function to get IBC channel from local storage
+        function getIBCChannel() {
+            return localStorage.getItem('ibcChannel');
+        }
+
+        // Retrieve the stored IBC channel
+        const ibcChannel = getIBCChannel();
+
+        // Display the stored channel ID
+        if (ibcChannel) {
+            document.write('Sending Via IBC Channel: ' + ibcChannel);
+        } else {
+            document.write('No IBC Channel stored.');
+        }
+
+
+        document.getElementById('receiverForm').addEventListener('submit', (event) => {
+            event.preventDefault(); // Prevent default form submission
+
+
+            const receiverAddress = document.getElementById('receiverAddressInput').value;
+
+
+            setReceiverAddress(receiverAddress);
+
+            // Log the stored receiver address
+            console.log('Stored Receiver Address:', receiverAddress);
+
+            // Redirect to selectpending.html
+            window.location.href = './selectspending.html';
+        });
+
+        
+        function setReceiverAddress(address) {
+            localStorage.setItem('receiverAddress', address);
+        }
+
+        function getReceiverAddress() {
+            return localStorage.getItem('receiverAddress');
+        }
+
+
+        function clearReceiverAddress() {
+            localStorage.removeItem('receiverAddress');
+        }
+    </script>
+</body>
+</html>

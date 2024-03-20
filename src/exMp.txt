@@ -1,0 +1,14 @@
+            const BASE_DIR_A = "$HOME/Library/'Application Support'/Namada";
+const spending_key_a = "dfghjk-spendingkey";
+const payment_addr_b = "hhh";
+const memo_path = "/Users/muhammednufais/Desktop/namadautils/src/ibc_shielded_transfer_1a12da90fae59ca2ac216a44a651650efb04a34d447f19de1d0ce703388d3edb.memo";
+const LEDGER_ADDRESS_A = "https://semjjonline.xyz";
+
+            const command = `namadac --base-dir ${BASE_DIR_A} ibc-transfer \
+--source ${spending_key_a} \
+--receiver ${payment_addr_b} \
+--token apfel \
+--amount 100 \
+--channel-id channel-0 \
+--memo-path ${memo_path} \
+--node ${LEDGER_ADDRESS_A}`;

@@ -1,0 +1,143 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Shielded Action Transaction </title>
+    <link href="./output.css" rel="stylesheet">
+    <style>
+        /* Style for button */
+        .button-like {
+            display: inline-block;
+            padding: 10px 20px;
+            background-color: yellow;
+            color: black;
+            border: none;
+            border-radius: 5px;
+            text-decoration: none;
+            cursor: pointer;
+            margin-bottom: 10px; /* Add margin bottom for spacing */
+        }
+    </style>
+</head>
+
+    <body style="background-color: black;">
+    <script src="store.js"></script>
+    <h1 style=" color: cyan; "  >Performing Shielded Action Transaction using existing Wallets</h1>
+    <button id="walletListButton" class="button-like">Select the payment address</button>
+
+    <pre style=" color: cyan; " id="output"></pre>
+
+    <div id="addressInput" style="display: none; color: cyan;">
+        <label for="addressNumber">Enter the number of the wallet:</label>
+        <input type="number" id="addressNumber" name="addressNumber" style="color: black;">
+        <button id="continueButton" class="button-like">Set</button>
+    </div>
+
+    <p id="selectedAddressText" style="display: none; color: cyan;">You have selected: <span id="selectedAddress"></span></p>
+    <button id="continueTransactionButton" class="button-like" style="display: none;">Continue</button>
+    <button id="goBackButton" class="button-like" onclick="redirectToIndex()">Go Back</button>
+
+
+    <script>
+        let paymentAddress = '';
+
+        function redirectToIndex() {
+            window.location.href = "./index.html";
+        }
+
+        const { ipcRenderer } = require('electron');
+
+        // Function to show wallet list and hide other elements
+        const showWalletList = (data) => {
+            const paymentKeys = extractPaymentKeys(data);
+
+            document.getElementById('output').innerText = paymentKeys;
+            document.getElementById('walletListButton').style.display = 'none';
+            document.getElementById('goBackButton').style.display = 'block';
+
+            // Show address input
+            document.getElementById('addressInput').style.display = 'block';
+
+            // Hide wallet operation buttons if they exist
+            const walletOperationsElement = document.getElementById('walletOperations');
+            if (walletOperationsElement) {
+                walletOperationsElement.style.display = 'none';
+            }
+        };
+
+        // Function to go back to the main page
+        const goBack = () => {
+            document.getElementById('output').innerText = '';
+            document.getElementById('goBackButton').style.display = 'none';
+            document.getElementById('walletListButton').style.display = 'block';
+
+            // Hide address input
+            document.getElementById('addressInput').style.display = 'none';
+
+            // Show wallet operation buttons
+            const walletOperationsElement = document.getElementById('walletOperations');
+            if (walletOperationsElement) {
+                walletOperationsElement.style.display = 'block';
+            }
+        };
+
+        ipcRenderer.on('walletList', (event, data) => {
+            showWalletList(data);
+        });
+
+        document.getElementById('walletListButton').addEventListener('click', () => {
+      document.getElementById('walletListButton').innerText = 'Loading...';
+      document.getElementById('walletListButton').disabled = true; // Disable the button until data is ready
+      ipcRenderer.send('executeWalletList');
+    });
+
+
+        // Store payment address when selected
+        document.getElementById('continueButton').addEventListener('click', () => {
+            const addressNumber = parseInt(document.getElementById('addressNumber').value);
+            const addresses = document.getElementById('output').innerText.split('\n');
+            if (addressNumber >= 1 && addressNumber <= addresses.length) {
+                paymentAddress = addresses[addressNumber - 1].split(' ')[1];
+                console.log('Selected Payment Address:', paymentAddress);
+                setPaymentAddress(paymentAddress); // Store payment address
+                document.getElementById('selectedAddress').innerText = paymentAddress;
+                document.getElementById('selectedAddressText').style.display = 'block';
+                document.getElementById('continueTransactionButton').style.display = 'block'; // Show continue button
+            } else {
+                alert('Invalid address number.');
+            }
+        });
+
+        // Retrieve and use stored payment address
+        document.getElementById('continueTransactionButton').addEventListener('click', () => {
+            const storedPaymentAddress = getPaymentAddress();
+            if (storedPaymentAddress) {
+                console.log('Using stored Payment Address:', storedPaymentAddress);
+                // Use the stored payment address as needed
+            } else {
+                console.log('No payment address stored.');
+                // Handle the case where no payment address is stored
+            }
+            window.location.href = "./transaction.html"; // Redirect to transaction.html
+        });
+
+        // Function to extract payment keys
+        function extractPaymentKeys(data) {
+    const regex = /Known payment addresses:\s*((?:"[^"]+":\s*z\w+\s*)+)/g;
+    let match;
+    let enumeration = 1;
+    const keys = [];
+    while ((match = regex.exec(data)) !== null) {
+        const addresses = match[1].split("\n").filter(Boolean);
+        addresses.forEach(address => {
+            const [alias, paymentAddress] = address.trim().split(":").map(str => str.replace(/"/g, ''));
+            keys.push(`${enumeration}. ${alias.trim()}`);
+            enumeration++;
+        });
+    }
+    return keys.join('\n');
+}
+    </script>
+</body>
+</html>

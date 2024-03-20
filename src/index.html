@@ -1,0 +1,127 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Namada Utility</title>
+  <link href="./output.css" rel="stylesheet">
+
+  <style>
+    /* Style for button */
+    .button-like {
+      padding: 10px 20px;
+      background-color: yellow;
+      color: black;
+      border: none;
+      margin-bottom: 4px;
+      border-radius: 5px;
+      cursor: pointer;
+    }
+
+    .output-container {
+      background-color: black;
+      color: yellow;
+      border: 0px;
+      padding: 4px 6px;
+      width: 100vw;
+      height: 70%;
+      margin-bottom: 6px;
+      text-wrap:  wrap;
+      margin: 6px;
+      overflow: auto;
+      display: none;
+    }
+
+    .home-container {
+      border: none;
+    }
+  </style>
+</head>
+<body style="background-color: #000;">
+  <div class="home-container">
+    <h1 class="text"></h1>
+    <video width=220" height="240" autoplay loop muted>
+      <source src="./namadapreview.mov" type="video/mp4">
+    </video>
+    <br>
+    <div  id="output-container" class="output-container">
+      <h1 id="output" ></h1>
+    </div>
+    <button id="goBackButton"  class="button-like" style="display: none;">Go Back</button>
+
+    <!-- Div for wallet operation buttons -->
+    <div id="walletOperations">
+      <button id="walletListButton" class="button-like">Wallet List</button>
+  
+      <button id="shieldedaction" class="button-like">Perform Shielded Action</button>
+      <button id="creatnew" class="button-like">Create A Wallet</button>
+      <button id="derivewallet" class="button-like">Derive a Wallet</button>
+      <button id="existingwallet" class="button-like">Shielded Swap</button>
+      <button id="ibcswap" class="button-like">Perform IBC Transfer</button>
+      <button id="shieldednaan" class="button-like">Shield Some Naan</button> 
+    </div>
+  </div>
+
+  <script>
+    const { ipcRenderer } = require('electron');
+    
+    // Function to show wallet list and hide other elements
+    const showWalletList = (data) => {
+      document.getElementById('output').innerText = data;
+      document.getElementById('walletListButton').innerText = 'Wallet List'; // Reset button text
+      document.getElementById('walletListButton').disabled = false; // Enable the button
+      document.getElementById('goBackButton').style.display = 'block';
+
+      // Hide wallet operation buttons
+      document.getElementById('walletOperations').style.display = 'none';
+
+      // Show output container
+      document.getElementById('output-container').style.display = 'block';
+    };
+
+    // Function to go back to main page
+    const goBack = () => {
+      document.getElementById('output').innerText = '';
+      document.getElementById('goBackButton').style.display = 'none';
+      document.getElementById('walletListButton').style.display = 'block';
+      document.getElementById('output-container').style.display = 'none';
+
+      // Show wallet operation buttons
+      document.getElementById('walletOperations').style.display = 'block';
+    };
+
+    ipcRenderer.on('walletList', (event, data) => {
+      showWalletList(data);
+    });
+
+    document.getElementById('walletListButton').addEventListener('click', () => {
+      document.getElementById('walletListButton').innerText = 'Loading...';
+      document.getElementById('walletListButton').disabled = true; // Disable the button until data is ready
+      ipcRenderer.send('executeWalletList');
+    });
+
+    document.getElementById('goBackButton').addEventListener('click', () => {
+      goBack();
+    });
+
+    // Add event listeners to navigate to different pages
+    document.getElementById('existingwallet').addEventListener('click', () => {
+      window.location.href = './existing-wallet.html';
+    });
+    document.getElementById('creatnew').addEventListener('click', () => {
+      window.location.href = './create-wallet1.html';
+    });
+    document.getElementById('shieldedaction').addEventListener('click', () => {
+      window.location.href = './shielded-action.html';
+    });
+    document.getElementById('shieldednaan').addEventListener('click', () => {
+      window.location.href = './shield-naan0.html';
+    });
+    document.getElementById('ibcswap').addEventListener('click', () => {
+      window.location.href = './perform-swap.html';
+    });
+    document.getElementById('derivewallet').addEventListener('click', () => {
+      window.location.href = './derive-wallet.html';
+    });
+
+  </script>
+</body>
+</html>

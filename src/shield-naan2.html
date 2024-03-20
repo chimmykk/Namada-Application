@@ -1,0 +1,155 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Set Wallet Alias</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: black; /* Set background color to black */
+            color: yellow; /* Set text color to yellow */
+        }
+
+        .container {
+            max-width: 800px;
+            margin: 20px auto;
+            padding: 20px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+            background-color: #000; /* Adjust container background color */
+        }
+
+        h1, h2, p {
+            margin: 0;
+            padding: 0;
+            color: yellow; /* Set heading and paragraph text color to yellow */
+        }
+
+        #terminalOutput {
+            border: 1px solid #ccc;
+            height: 200px;
+            overflow-y: scroll;
+            padding: 10px;
+            background-color: #000;
+            border-radius: 5px;
+            color: cyan; /* Adjust terminal output text color */
+        }
+
+        #commandForm {
+            margin-top: 20px;
+            display: flex;
+            align-items: center;
+        }
+
+        #commandInput {
+            flex: 1;
+            padding: 8px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+            color: black; /* Adjust command input text color */
+        }
+
+        #submitBtn {
+            padding: 8px 20px;
+            background-color: yellow;
+            color: #000;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            margin-left: 10px;
+        }
+
+        #submitBtn:hover {
+            background-color: cyan;
+        }
+
+        .button-like {
+      padding: 10px 20px;
+      background-color: yellow;
+      color: black;
+      border: none;
+      margin-bottom: 4px;
+      border-radius: 5px;
+      cursor: pointer;
+    }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Sending your NAAN to Spending Address (znam) </h1>
+        <p>This transaction involve sending NAAN from Transparent to your Spending <address></address>.</p>
+
+       
+
+        <h2>Processing the transaction</h2>
+        <pre id="terminalOutput"></pre>
+
+        <form id="commandForm">
+            <label for="commandInput">Enter Command:</label>
+            <input type="text" id="commandInput" name="commandInput">
+            <button id="submitBtn" type="submit">Submit</button>
+            <br>
+            <button id="goBackButton" class="button-like">Go Back</button>
+        </form>
+    </div>
+
+    <script>
+        // Electron IPCRenderer import
+        const { ipcRenderer } = require('electron');
+
+        // Event listener for going back
+        document.getElementById('goBackButton').addEventListener('click', redirectToIndex);
+
+        function redirectToIndex() {
+            window.location.href = "./shield-naan1.html";
+        }
+
+        // Function to send command to main process
+        function sendCommandToMain(command) {
+            ipcRenderer.send('executeInteractiveCommand', command);
+        }
+
+        // Function to get transparent address from local storage
+        function getTransparentAddress() {
+            return localStorage.getItem('transparentAddress');
+        }
+
+        // Function to get payment address from local storage
+        function getPaymentAddress() {
+            return localStorage.getItem('paymentAddress');
+        }
+
+        // Function to get amount from local storage
+        function getAmount() {
+            return localStorage.getItem('amount');
+        }
+
+        // Execute the transfer command on page load every time
+        window.onload = function() {
+            // Run the command without user interaction
+            const command = "namada client transfer --source " + getTransparentAddress() + " --target " + getPaymentAddress() + " --token NAAN --amount " + getAmount() + " --node https://semjjonline.xyz";
+            sendCommandToMain(command);
+            localStorage.setItem('commandExecuted', 'false'); // Set flag indicating command execution
+        };
+
+        // Listen for terminal data and update the output area
+        ipcRenderer.on('interactiveCommandOutput', (event, data) => {
+            const output = document.getElementById('terminalOutput');
+            output.textContent += data;
+            output.scrollTop = output.scrollHeight; // Auto-scroll to the bottom
+        });
+
+        // Event listener for form submission
+        document.getElementById('commandForm').addEventListener('submit', function(event) {
+            event.preventDefault(); // Prevent default form submission behavior
+            const commandInput = document.getElementById('commandInput').value;
+            sendCommandToMain(commandInput); // Send the command to main process
+            document.getElementById('commandInput').value = ''; // Clear input field after submission
+        });
+    </script>
+</body>
+</html>

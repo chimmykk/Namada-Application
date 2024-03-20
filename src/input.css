@@ -1,0 +1,32 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+
+body{
+    @apply p-4 min-h-screen w-full mx-32 ;
+}
+
+.text{
+    @apply text-cyan-400 font-bold uppercase text-5xl mb-12 stroke-black stroke-4;
+}
+
+.button-like{
+    @apply hover:bg-[#00ffff] hover:text-black w-full
+}
+
+.home-container{
+    @apply flex flex-col items-center justify-center text-left h-screen border-none;
+}
+
+#walletOperations{
+    @apply flex flex-col items-center justify-center gap-4
+}
+
+#output{
+    @apply bg-white   p-4 w-1/2 overflow-hidden;
+}
+
+.output-container{
+    @apply w-[400px] overflow-hidden mx-auto text-red-500 p-12;
+}

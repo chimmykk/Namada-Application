@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Transaction</title>
+    <link href="./output.css" rel="stylesheet">
+
+    <style>
+        /* Style for button */
+        .button-like {
+            padding: 10px 20px;
+            background-color: yellow;
+            color: black;
+            border: none;
+            margin-bottom: 4px;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+
+        .output-container {
+            background-color: black;
+            color: yellow;
+            padding: 12px;
+            width: 100vw;
+            height: 70%;
+            margin-bottom: 6px;
+            text-wrap: wrap;
+            margin: 6px;
+            overflow: auto;
+            font-size: 1rem;
+        }
+
+        .enter-amount {
+            color: #00ffff;
+        }
+    </style>
+</head>
+<body style="background-color: black;">
+    <h1 class="text" button-like>Transaction</h1>
+    <label class="enter-amount" for="amountInput">Enter the amount:</label>
+    <input type="number" id="amountInput" style="padding: 8px; border-radius: 5px; border: 1px solid cyan; width: 200px; background: transparent; color: cyan; outline: none;">
+    <button id="submitAmountButton" class="button-like" disabled>Submit and Continue</button>
+    <p class="output-container">Amount: <span id="displayAmount"></span></p>
+
+    <script src="./store.js"></script>
+    <script>
+        // Function to enable/disable submit button based on input
+        function checkInput() {
+            const amountInput = document.getElementById('amountInput');
+            const submitButton = document.getElementById('submitAmountButton');
+            submitButton.disabled = !amountInput.value;
+        }
+
+        // Add event listener to the input field
+        document.getElementById('amountInput').addEventListener('input', checkInput);
+
+        // Add event listener to the submit button
+        document.getElementById('submitAmountButton').addEventListener('click', () => {
+            const amount = document.getElementById('amountInput').value;
+            document.getElementById('displayAmount').innerText = amount;
+
+        
+
+            // Store the amount in local storage
+            setAmount(amount);
+
+            // Redirect to ibc.html
+            window.location.href = "./ibcone.html";
+        });
+    </script>
+</body>
+</html>

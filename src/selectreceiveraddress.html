@@ -1,0 +1,134 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+    <style>
+        body {
+            background-color: black;
+            color: yellow;
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+        }
+
+        h1 {
+            text-align: center;
+        }
+
+        /* Apply the same button style */
+        .button-like {
+            display: inline-block;
+            padding: 10px 20px;
+            background-color: yellow;;
+            color: black;
+            border: none;
+            border-radius: 5px;
+            text-decoration: none;
+            cursor: pointer;
+            margin-bottom: 10px; /* Add margin bottom for spacing */
+        }
+
+        pre {
+            border: 1px solid #ccc;
+            height: 200px;
+            overflow-y: scroll;
+            padding: 10px;
+            border-radius: 5px;
+            margin-bottom: 10px;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 10px;
+        }
+
+        input[type="number"] {
+            padding: 8px;
+            border-radius: 5px;
+            border: 1px solid cyan;
+            width: 300px;
+            background: transparent;
+            color: cyan;
+            outline: none;
+            margin-bottom: 10px;
+        }
+
+        #selectedAddressText {
+            text-align: center;
+        }
+
+        #receiverAddressInput {
+            background-color: #000;
+            color: #00ff00;
+            font-family: 'Courier New', monospace;
+            padding: 10px;
+            overflow-y: auto;
+            white-space: pre-wrap; /* Ensures text wraps inside the container */
+            word-wrap: break-word;
+            width: 100%;
+        }
+    </style>
+</head>
+<body>
+    <h1>This is the receiving address wallet input</h1>
+
+
+    <form id="receiverForm">
+        <label for="receiverAddressInput">Enter receiver address:</label>
+        <input type="text" id="receiverAddressInput">
+        <br>
+        <button type="submit" class="button-like">Submit</button>
+    </form>
+
+    <script src="./store.js"></script>
+    <script>
+        // Function to get IBC channel from local storage
+        function getIBCChannel() {
+            return localStorage.getItem('ibcChannel');
+        }
+
+        // Retrieve the stored IBC channel
+        const ibcChannel = getIBCChannel();
+
+        // Display the stored channel ID
+        if (ibcChannel) {
+            document.write('Sending Via IBC Channel: ' + ibcChannel);
+        } else {
+            document.write('No IBC Channel stored.');
+        }
+
+
+        document.getElementById('receiverForm').addEventListener('submit', (event) => {
+            event.preventDefault(); // Prevent default form submission
+
+
+            const receiverAddress = document.getElementById('receiverAddressInput').value;
+
+
+            setReceiverAddress(receiverAddress);
+
+            // Log the stored receiver address
+            console.log('Stored Receiver Address:', receiverAddress);
+
+            // Redirect to selectpending.html
+            window.location.href = './selecttransparentswap.html';
+        });
+
+        
+        function setReceiverAddress(address) {
+            localStorage.setItem('receiverAddress', address);
+        }
+
+        function getReceiverAddress() {
+            return localStorage.getItem('receiverAddress');
+        }
+
+
+        function clearReceiverAddress() {
+            localStorage.removeItem('receiverAddress');
+        }
+    </script>
+</body>
+</html>

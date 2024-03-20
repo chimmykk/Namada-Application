@@ -1,0 +1,124 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Create Wallet</title>
+    <style>
+        body {
+            background-color: black;
+            color: yellow;
+            font-family: 'Arial', sans-serif;
+            padding: 20px;
+            margin: 0;
+        }
+
+        h1, h2 {
+            color: cyan;
+        }
+
+        label, p {
+            color: cyan;
+        }
+
+        input[type="text"] {
+            width: 300px;
+            padding: 10px;
+            margin: 10px 0;
+            border-radius: 5px;
+            border: 1px solid #ddd;
+            box-sizing: border-box; /* Ensures padding doesn't affect overall width */
+            background-color: transparent;
+            color: yellow;
+        }
+
+        button {
+            background-color: yellow;
+            color: black;
+            padding: 10px 20px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            margin-right: 10px;
+        }
+
+        button:hover {
+            background-color: cyan;
+        }
+
+        .button-like {
+            background-color: grey;
+        }
+
+        #terminalOutput {
+            background-color: #000;
+            color: #00ff00;
+            font-family: 'Courier New', monospace;
+            padding: 10px;
+            overflow-y: auto;
+            white-space: pre-wrap; /* Ensures text wraps inside the container */
+            word-wrap: break-word;
+        }
+    </style>
+</head>
+<body>
+    <h1>Derive your wallet here:</h1>
+
+    <h1>Create A New Fresh Wallet</h1>
+    <p>Here we create everything for you including payment address, spending keys.</p>
+
+    <label for="walletName">Enter your wallet name or alias:</label>
+    <input type="text" id="walletName" placeholder="Input your desired alias">
+  
+    <br>
+    <button id="createWalletButton">Set Alias Now</button>
+    <button id="goBackButton" class="button-like">Go Back</button>
+
+    <h2>Deriving your account</h2>
+    <pre id="terminalOutput"></pre>
+    <input type="text" id="terminalInput" placeholder="Input your Password">
+    <button id="submitCommand">Submit</button>
+
+    <script>
+        const { ipcRenderer } = require('electron');
+
+        document.getElementById('goBackButton').addEventListener('click', redirectToIndex);
+
+        function redirectToIndex() {
+            window.location.href = "./index.html";
+        }
+
+        document.getElementById('createWalletButton').addEventListener('click', () => {
+            const walletName = document.getElementById('walletName').value.trim();
+            if (walletName !== '') {
+                const command = `namada wallet derive --alias ${walletName}\n`;
+                ipcRenderer.send('toTerminal', command);
+            } else {
+                alert('Please enter a wallet name.');
+            }
+        });
+
+        ipcRenderer.on('terminalData', (event, data) => {
+            const output = document.getElementById('terminalOutput');
+            output.textContent += data;
+            output.scrollTop = output.scrollHeight;
+        });
+
+        document.getElementById('submitCommand').addEventListener('click', () => {
+            const command = document.getElementById('terminalInput').value + '\n';
+            if (command.trim() !== '') {
+                ipcRenderer.send('toTerminal', command);
+                document.getElementById('terminalInput').value = '';
+            }
+        });
+
+        document.getElementById('terminalInput').addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') {
+                e.preventDefault();
+                document.getElementById('submitCommand').click();
+            }
+        });
+    </script>
+</body>
+</html>

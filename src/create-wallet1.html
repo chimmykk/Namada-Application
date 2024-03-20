@@ -1,0 +1,156 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Set Wallet Alias</title>
+    <style>
+        body {
+            background-color: black;
+            color: yellow;
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+        }
+
+        h1, h2 {
+            text-align: center;
+        }
+
+        p {
+            text-align: center;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 10px;
+        }
+
+        input[type="text"] {
+            padding: 8px;
+            border-radius: 5px;
+            border: 1px solid cyan;
+            width: 300px;
+            background: transparent;
+            color: cyan;
+            outline: none;
+            margin-bottom: 10px;
+        }
+
+        button {
+            padding: 10px 20px;
+            background-color: yellow;
+            color: black;
+            border: none;
+            margin-bottom: 10px;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+
+        #terminalOutput {
+            border: 1px solid #ccc;
+            height: 200px;
+            overflow-y: scroll;
+            padding: 10px;
+            border-radius: 5px;
+            margin-bottom: 10px;
+        }
+
+        #terminalInput {
+            padding: 8px;
+            border-radius: 5px;
+            border: 1px solid cyan;
+            width: 300px;
+            background: transparent;
+            color: cyan;
+            outline: none;
+            margin-bottom: 10px;
+            display: none; /* Hide initially */
+        }
+    </style>
+</head>
+<body>
+    <h1>Create A New Fresh Wallet</h1>
+    <p>Here we create everything for you including payment address, spending keys.</p>
+
+    <label for="walletName">Enter your wallet name or alias:</label>
+    <input type="text" id="walletName" placeholder="Enter wallet name">
+  
+    <br>
+    <button id="createWalletButton">Set Alias Now</button>
+    <button id="goBackButton" class="button-like">Go Back</button>
+    <button id="nextStepButton" onclick="redirectToCreateWallet2()" style="display: none;">Next Create Spending Key</button> <!-- Initially hidden Next Step button -->
+
+    <h2>Generating your account</h2>
+    <pre id="terminalOutput"></pre>
+    <input type="password" id="terminalInput" placeholder="Enter your encryption password" style="display: none;"> <!-- Initially hidden input password field -->
+    <button id="submitCommand" style="display: none;">Submit</button> <!-- Initially hidden submit button -->
+
+    <script>
+        const { ipcRenderer } = require('electron');
+
+        document.getElementById('goBackButton').addEventListener('click', redirectToIndex);
+
+        function redirectToIndex() {
+            window.location.href = "./index.html";
+        }
+
+        document.getElementById('createWalletButton').addEventListener('click', () => {
+            const walletName = document.getElementById('walletName').value.trim();
+            if (walletName !== '') {
+                const command = `namada wallet gen --alias ${walletName}\n`;
+                ipcRenderer.send('toTerminal', command);
+            } else {
+                alert('Please enter a wallet name.');
+            }
+        });
+ 
+        // Listen for terminal data and update the output area
+        ipcRenderer.on('terminalData', (event, data) => {
+            const output = document.getElementById('terminalOutput');
+            output.textContent += data;
+            output.scrollTop = output.scrollHeight; // Auto-scroll to the bottom
+
+            // Check if the output contains the specific messages
+            if (data.includes('Enter your encryption password:') || data.includes('Enter same passphrase again:')) {
+                // Display the input password field and submit button
+                document.getElementById('terminalInput').style.display = 'block';
+                document.getElementById('submitCommand').style.display = 'block';
+            } else if (data.includes('Successfully added')) {
+                // Hide the input password field and submit button
+                document.getElementById('terminalInput').style.display = 'none';
+                document.getElementById('submitCommand').style.display = 'none';
+                // Show the Next Create Spending Key button
+                document.getElementById('nextStepButton').style.display = 'block';
+                // Disable the Set Alias Now button
+                document.getElementById('createWalletButton').disabled = true;
+            }
+        });
+
+        // Send command from the input box to the terminal
+        document.getElementById('submitCommand').addEventListener('click', () => {
+            const command = document.getElementById('terminalInput').value + '\n'; // Ensure newline to execute
+            if (command.trim() !== '') {
+                ipcRenderer.send('toTerminal', command);
+                document.getElementById('terminalInput').value = ''; // Clear input after sending
+            }
+        });
+
+        // Optionally, handle Enter key in the input box to submit command
+        document.getElementById('terminalInput').addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') {
+                e.preventDefault(); // Prevent form submission
+                document.getElementById('submitCommand').click();
+            }
+        });
+
+        // Function to redirect to create-wallet2.html
+        function redirectToCreateWallet2() {
+            window.location.href = "./create-wallet2.html";
+        }
+    </script>
+</body>
+</html>
+
+

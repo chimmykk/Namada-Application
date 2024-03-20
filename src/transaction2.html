@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Transaction</title>
+</head>
+<body>
+    <h1>Shielded Transfer</h1>
+    <label for="amountInput">Enter the amount to be shielded:</label>
+    <input type="number" id="amountInput">
+    <button id="submitAmountButton">Submit</button>
+    <p>Amount: <span id="displayAmount"></span></p>
+    
+    <!-- Continue button -->
+    <button id="continueButton">Continue Next</button>
+
+    <script src="./store.js"></script>
+    <script>
+        // Retrieve payment address from localStorage
+        const paymentAddress = getPaymentAddress();
+
+        document.getElementById('submitAmountButton').addEventListener('click', () => {
+            const amount = document.getElementById('amountInput').value;
+            document.getElementById('displayAmount').innerText = amount;
+
+            // Log the selected payment address
+            console.log('Selected Payment Address:', paymentAddress);
+
+            // Store the amount in local storage
+            setAmount(amount);
+
+            // You can perform further actions with the amount here, like sending it to a server or processing it locally
+        });
+
+        // Continue button event listener
+        document.getElementById('continueButton').addEventListener('click', () => {
+            window.location.href = "./selectspendforshield.html"; // Redirect to ibc.html
+        });
+    </script>
+</body>
+</html>

@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Receive Address Submission</title>
+    <style>
+        /* Style for button */
+        .button-like {
+            padding: 10px 20px;
+            background-color: yellow;
+            color: black;
+            border: none;
+            margin-bottom: 4px;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+
+        /* Style for input field */
+        .input-like {
+            padding: 8px;
+            border-radius: 5px;
+            border: 1px solid cyan;
+            width: 200px;
+            background: transparent;
+            color: cyan;
+            outline: none;
+            margin-bottom: 8px;
+        }
+
+        /* Style for form container */
+        .form-container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+        .h1
+        {
+            text-align: center;
+        }
+    </style>
+</head>
+<body style="background-color: black; color: yellow;">
+    <h1> Submit Receiving Address and Channel ID</h1>
+    <div class="form-container">
+        <form id="addressForm">
+            <label for="receiveAddress">Receiving Address / Target Address:</label><br>
+            <input type="text" id="receiveAddress" class="input-like" required><br>
+            <p>Format: "channel-0"</p>
+
+            <label for="channelId">Channel ID:</label><br>
+            <input type="text" id="channelId" class="input-like" required><br>
+
+            <button type="submit" class="button-like">Submit</button>
+        </form>
+    </div>
+
+    <!-- Include .store.js -->
+    <script src="./store.js"></script>
+
+    <script>
+        document.getElementById('addressForm').addEventListener('submit', function(event) {
+            event.preventDefault(); // Prevent default form submission
+
+            // Retrieve values from input fields
+            const receivingAddress = document.getElementById('receiveAddress').value;
+            const channelId = document.getElementById('channelId').value;
+                
+            // Set IBC receiver address and amount in local storage
+            setIBCReceiverAddress(receivingAddress);
+            setIBCAmount(channelId);
+
+            // Perform any further actions with the received data here
+
+            // Optional: Clear the input fields after submission
+            document.getElementById('receiveAddress').value = '';
+            document.getElementById('channelId').value = '';
+
+            // Optional: Provide feedback to the user
+            
+            alert('Receiving address and Channel ID submitted successfully!');
+            window.location.href = './initiatetxn1.html';
+        });
+    </script>
+</body>
+</html>

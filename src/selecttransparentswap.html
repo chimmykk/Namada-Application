@@ -1,0 +1,175 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Perform Transaction using existing Wallets</title>
+    <style>
+        body {
+            background-color: black;
+            color: yellow;
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+        }
+
+        h1 {
+            text-align: center;
+        }
+
+        /* Apply the same button style */
+        .button-like {
+            display: inline-block;
+            padding: 10px 20px;
+            background-color: yellow;;
+            color: black;
+            border: none;
+            border-radius: 5px;
+            text-decoration: none;
+            cursor: pointer;
+            margin-bottom: 10px; /* Add margin bottom for spacing */
+        }
+
+        pre {
+            border: 1px solid #ccc;
+            height: 200px;
+            overflow-y: scroll;
+            padding: 10px;
+            border-radius: 5px;
+            margin-bottom: 10px;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 10px;
+        }
+
+        input[type="number"] {
+            padding: 8px;
+            border-radius: 5px;
+            border: 1px solid cyan;
+            width: 300px;
+            background: transparent;
+            color: cyan;
+            outline: none;
+            margin-bottom: 10px;
+        }
+
+        #selectedAddressText {
+            text-align: center;
+        }
+    </style>
+</head>
+<body>
+    <h1>Perform Swap Transaction using existing Wallets</h1>
+    <button id="walletListButton" class="button-like">Select the signing key or transparent key</button>
+
+    <pre id="output"></pre>
+
+    <div id="addressInput" style="display: none;">
+        <label for="addressNumber">Enter the number of the wallet:</label>
+        <input type="number" id="addressNumber" name="addressNumber">
+        <button id="continueButton" class="button-like">Set</button>
+    </div>
+
+    <p id="selectedAddressText" style="display: none;">You have selected: <span id="selectedAddress"></span></p>
+    <button id="continueTransactionButton" class="button-like" style="display: none;">Continue</button>
+    <button id="goBackButton" class="button-like" onclick="redirectToIndex()">Go Back</button>
+
+
+    <script src="./store.js"></script>
+    <script>
+        function redirectToIndex() {
+            window.location.href = "./index.html";
+        }
+
+        // Function to show wallet list and hide other elements
+        const showWalletList = (data) => {
+            const paymentKeys = extractPaymentKeys(data);
+            document.getElementById('output').innerText = paymentKeys;
+            document.getElementById('walletListButton').style.display = 'none';
+            document.getElementById('goBackButton').style.display = 'block';
+            document.getElementById('addressInput').style.display = 'block';
+            const walletOperationsElement = document.getElementById('walletOperations');
+            if (walletOperationsElement) {
+                walletOperationsElement.style.display = 'none';
+            }
+        };
+
+        // Function to go back to main page
+        const goBack = () => {
+            document.getElementById('output').innerText = '';
+            document.getElementById('goBackButton').style.display = 'none';
+            document.getElementById('walletListButton').style.display = 'block';
+            document.getElementById('addressInput').style.display = 'none';
+            const walletOperationsElement = document.getElementById('walletOperations');
+            if (walletOperationsElement) {
+                walletOperationsElement.style.display = 'block';
+            }
+        };
+
+        // Handle IPC event for wallet list
+        const { ipcRenderer } = require('electron');
+        ipcRenderer.on('walletList', (event, data) => {
+            showWalletList(data);
+        });
+
+        // Event listener for fetching wallet list
+        document.getElementById('walletListButton').addEventListener('click', () => {
+      document.getElementById('walletListButton').innerText = 'Loading...';
+      document.getElementById('walletListButton').disabled = true; // Disable the button until data is ready
+      ipcRenderer.send('executeWalletList');
+    });
+
+
+        // Store selected payment address as spending address
+        document.getElementById('continueButton').addEventListener('click', () => {
+            const addressNumber = parseInt(document.getElementById('addressNumber').value);
+            const addresses = document.getElementById('output').innerText.split('\n');
+            if (addressNumber >= 1 && addressNumber <= addresses.length) {
+                const transparentAddress = addresses[addressNumber - 1].split(' ')[1];
+                console.log('Selected Transparent Address:', transparentAddress);
+                setTransparentAddress(transparentAddress); // Store transparent address
+                document.getElementById('selectedAddress').innerText = transparentAddress;
+                document.getElementById('selectedAddressText').style.display = 'block';
+                document.getElementById('continueTransactionButton').style.display = 'block'; // Show continue button
+            } else {
+                alert('Invalid address number.');
+            }
+        });
+
+        // Redirect to selecttransparent.html to continue transaction
+        document.getElementById('continueTransactionButton').addEventListener('click', () => {
+            window.location.href = "./sendtxn.html";
+        });
+
+        // Function to extract payment keys
+        function extractPaymentKeys(data) {
+            const regex = /Alias "([^"]+)" \(encrypted\):\s*\n\s*Public key hash: [A-F0-9]+\s*\n\s*Public key: (\w+)/g;
+            let match;
+            let enumeration = 1;
+            const keys = [];
+            while ((match = regex.exec(data)) !== null) {
+                keys.push(`${enumeration}. ${match[1]}`);
+                enumeration++;
+            }
+            return keys.join('\n');
+        }
+
+        // Function to set transparent address in local storage
+        function setTransparentAddress(address) {
+            localStorage.setItem('transparentAddress', address);
+        }
+
+        // Function to get transparent address from local storage
+        function getTransparentAddress() {
+            return localStorage.getItem('transparentAddress');
+        }
+
+        // Function to clear transparent address from local storage
+        function clearTransparentAddress() {
+            localStorage.removeItem('transparentAddress');
+        }
+    </script>
+</body>
+</html>
