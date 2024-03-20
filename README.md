@@ -11,7 +11,7 @@
 
 Welcome to Namada Application! This application utilizes the Namada SDK for seamless integration with blockchain functionalities.
 
-https://ibb.co/mqvP013
+![Namada Application Screenshot](https://i.ibb.co/mqvP013/your-image-name-here.jpg)
 
 ## Requirements
 
