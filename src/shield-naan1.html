@@ -160,17 +160,17 @@
         document.getElementById('continueTransactionButton').addEventListener('click', () => {
             window.location.href = "./amountforshield.html";
         });
-
-        // Function to extract payment keys
         function extractPaymentKeys(data) {
-    const regex = /Alias "(.*?)" \(encrypted\):\s+Viewing Key: z\w+/g;
+    const regex = /Known payment addresses:\s*((?:"([^"]+)":\s*z\w+\s*)+)/g;
     let enumeration = 1;
     const keys = [];
-    const aliases = data.match(regex);
-    if (aliases) {
-        aliases.forEach(aliasMatch => {
-            const alias = aliasMatch.replace(/Alias "(.*?)" \(encrypted\):\s+Viewing Key: z\w+/, '$1');
-            keys.push(`${enumeration}. ${alias}`);
+    let match;
+    while ((match = regex.exec(data)) !== null) {
+        const addresses = match[1].split("\n").filter(Boolean);
+        addresses.forEach(address => {
+            const [alias, paymentAddress] = address.trim().split(":");
+            const cleanAlias = alias.replace(/^"|"$/g, ''); // Remove leading and trailing quotation marks
+            keys.push(`${enumeration}. ${cleanAlias}`);
             enumeration++;
         });
     }
