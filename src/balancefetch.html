@@ -1,0 +1,163 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link href="./output.css" rel="stylesheet">
+    <title>Balance</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: black; /* Set background color to black */
+            color: yellow; /* Set text color to yellow */
+        }
+
+        .container {
+            max-width: 800px;
+            margin: 20px auto;
+            padding: 20px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+            background-color: #000; /* Adjust container background color */
+        }
+
+        h1, h2, p {
+            margin: 0;
+            padding: 0;
+            color: yellow; /* Set heading and paragraph text color to yellow */
+        }
+
+        #terminalOutput {
+            border: 1px solid #ccc;
+            height: 200px;
+            overflow-y: scroll;
+            padding: 10px;
+            background-color: #000;
+            border-radius: 5px;
+            color: cyan; /* Adjust terminal output text color */
+        }
+
+        #commandForm {
+            margin-top: 20px;
+            display: flex;
+            align-items: center;
+        }
+
+        #commandInput {
+            flex: 1;
+            padding: 8px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+            color: black; /* Adjust command input text color */
+        }
+
+        #submitBtn {
+            padding: 8px 20px;
+            background-color: yellow;
+            color: #000;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            margin-left: 10px;
+        }
+
+        #submitBtn:hover {
+            background-color: cyan;
+        }
+
+        .button-like {
+            padding: 10px 20px;
+            background-color: yellow;
+            color: black;
+            border: none;
+            margin-bottom: 4px;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+    </style>
+</head>
+<body>
+
+<h1>Available balance on the following address</h1>
+<button id="walletListButton" class="button-like">Check Now</button>
+<pre id="output"></pre>
+
+<div id="addressInput" style="display: none;">
+
+</div>
+
+
+<button id="goBackButton" class="button-like" onclick="redirectToIndex()">Go Back</button>
+
+<!-- Script tags for your JavaScript code -->
+
+<script>
+    // Function to show wallet list and hide other elements
+    const showWalletList = (data) => {
+        const paymentKeys = extractImplicitKeys(data);
+        document.getElementById('output').innerText = paymentKeys;
+        document.getElementById('walletListButton').style.display = 'none';
+        document.getElementById('goBackButton').style.display = 'block';
+        document.getElementById('addressInput').style.display = 'block';
+        const walletOperationsElement = document.getElementById('walletOperations');
+        if (walletOperationsElement) {
+            walletOperationsElement.style.display = 'none';
+        }
+
+        // Extract addresses starting with "tnam"
+        const addresses = data.match(/tnam\w+/g);
+        addresses.forEach(address => {
+            fetchBalance(address); // Fetch balance for each address
+        });
+    };
+
+    // Function to fetch balance for an address
+    const fetchBalance = (address) => {
+        const xhr = new XMLHttpRequest();
+        xhr.open('GET', `https://namada-se.explorer.2pilot.dev/api/blockchain/balance/${address}`, true);
+        xhr.onreadystatechange = function () {
+            if (xhr.readyState === 4 && xhr.status === 200) {
+                const balance = (parseFloat(xhr.responseText) / 1000000).toFixed(2);
+                const addressElement = document.createElement('div');
+                addressElement.innerHTML = `<p>${address}: ${balance}</p>`;
+                document.getElementById('addressInput').appendChild(addressElement);
+            }
+        };
+        xhr.send();
+    };
+
+    // Handle IPC event for wallet list
+    const { ipcRenderer } = require('electron');
+    ipcRenderer.on('walletList', (event, data) => {
+        showWalletList(data);
+    });
+
+    // Event listener for fetching wallet list
+    document.getElementById('walletListButton').addEventListener('click', () => {
+        document.getElementById('walletListButton').innerText = 'Loading...';
+        document.getElementById('walletListButton').disabled = true; // Disable the button until data is ready
+        ipcRenderer.send('executeWalletList');
+    });
+
+    function extractImplicitKeys(data) {
+        const regex = /"([^"]+)": Implicit:\s+(\w+)/g;
+        let enumeration = 1;
+        const keys = [];
+        let match;
+        while ((match = regex.exec(data)) !== null) {
+            const alias = match[1];
+            const address = match[2];
+            keys.push(`${enumeration}. ${alias}: ${address}`);
+            enumeration++;
+        }
+        return keys.join('\n');
+    }
+
+    function redirectToIndex() {
+        window.location.href = "./index.html";
+    }
+</script>
+</body>
+</html>
