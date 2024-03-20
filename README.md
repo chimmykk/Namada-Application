@@ -1,4 +1,4 @@
-# BUILD USING
+# Built using Electron JS
 
 [![Electron Logo](https://electronjs.org/images/electron-logo.svg)](https://electronjs.org)
 
@@ -10,6 +10,8 @@
 # Namada Application
 
 Welcome to Namada Application! This application utilizes the Namada SDK for seamless integration with blockchain functionalities.
+
+https://ibb.co/mqvP013
 
 ## Requirements
 
