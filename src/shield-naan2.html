@@ -1,4 +1,3 @@
-
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -68,88 +67,82 @@
         }
 
         .button-like {
-      padding: 10px 20px;
-      background-color: yellow;
-      color: black;
-      border: none;
-      margin-bottom: 4px;
-      border-radius: 5px;
-      cursor: pointer;
-    }
+            padding: 10px 20px;
+            background-color: yellow;
+            color: black;
+            border: none;
+            margin-bottom: 4px;
+            border-radius: 5px;
+            cursor: pointer;
+        }
     </style>
 </head>
 <body>
-    <div class="container">
-        <h1>Sending your NAAN to Spending Address (znam) </h1>
-        <p>This transaction involve sending NAAN from Transparent to your Spending <address></address>.</p>
+<div class="container">
+    <h1>Sending your NAAN to Spending Address (znam) </h1>
+    <p>This transaction involves sending NAAN from Transparent to your Spending <address></address>.</p>
 
-       
+    <h2>Processing the transaction</h2>
+    <pre id="terminalOutput"></pre>
 
-        <h2>Processing the transaction</h2>
-        <pre id="terminalOutput"></pre>
+    <form id="commandForm">
+        <label for="commandInput">Enter Command:</label>
+        <input type="text" id="commandInput" name="commandInput">
+        <button id="submitBtn" type="submit">Submit</button>
+        <br>
+        <button id="goBackButton" class="button-like">Go Back</button>
+    </form>
+</div>
 
-        <form id="commandForm">
-            <label for="commandInput">Enter Command:</label>
-            <input type="text" id="commandInput" name="commandInput">
-            <button id="submitBtn" type="submit">Submit</button>
-            <br>
-            <button id="goBackButton" class="button-like">Go Back</button>
-        </form>
-    </div>
+<script>
+    // Electron IPCRenderer import
+    const { ipcRenderer } = require('electron');
 
-    <script>
-        // Electron IPCRenderer import
-        const { ipcRenderer } = require('electron');
+    // Event listener for going back
+    document.getElementById('goBackButton').addEventListener('click', redirectToIndex);
 
-        // Event listener for going back
-        document.getElementById('goBackButton').addEventListener('click', redirectToIndex);
+    function redirectToIndex() {
+        window.location.href = "./shield-naan1.html";
+    }
 
-        function redirectToIndex() {
-            window.location.href = "./shield-naan1.html";
-        }
+    // Function to send command to main process
+    function sendCommandToMain(command) {
+        ipcRenderer.send('executeInteractiveCommand', command);
+    }
 
-        // Function to send command to main process
-        function sendCommandToMain(command) {
-            ipcRenderer.send('executeInteractiveCommand', command);
-        }
+    // Listen for terminal data and update the output area
+    ipcRenderer.on('interactiveCommandOutput', (event, data) => {
+        const output = document.getElementById('terminalOutput');
+        output.textContent += data;
+        output.scrollTop = output.scrollHeight; // Auto-scroll to the bottom
+    });
 
-        // Function to get transparent address from local storage
-        function getTransparentAddress() {
-            return localStorage.getItem('transparentAddress');
-        }
+    // Event listener for form submission
+    document.getElementById('commandForm').addEventListener('submit', function(event) {
+        event.preventDefault(); // Prevent default form submission behavior
+        const commandInput = document.getElementById('commandInput').value;
+        sendCommandToMain(commandInput); // Send the command to main process
+        document.getElementById('commandInput').value = ''; // Clear input field after submission
+    });
 
-        // Function to get payment address from local storage
-        function getPaymentAddress() {
-            return localStorage.getItem('paymentAddress');
-        }
+    // Execute the transfer command on page load every time
+    window.onload = function() {
+        // Get transparent address from local storage
+        const transparent = localStorage.getItem('transparentAddress');
+        const payment = localStorage.getItem('paymentAddress');
+        console.log(payment)
+        const amount = localStorage.getItem('amount');
 
-        // Function to get amount from local storage
-        function getAmount() {
-            return localStorage.getItem('amount');
-        }
+        // Run the command without user interaction
+        const command = "namada client transfer --source " + transparent + " --target " + payment + " --token NAAN --amount " + amount + " --node https://semjjonline.xyz";
+        sendCommandToMain(command);
+        localStorage.setItem('commandExecuted', 'false'); // Set flag indicating command execution
 
-        // Execute the transfer command on page load every time
-        window.onload = function() {
-            // Run the command without user interaction
-            const command = "namada client transfer --source " + getTransparentAddress() + " --target " + getPaymentAddress() + " --token NAAN --amount " + getAmount() + " --node https://semjjonline.xyz";
-            sendCommandToMain(command);
-            localStorage.setItem('commandExecuted', 'false'); // Set flag indicating command execution
-        };
-
-        // Listen for terminal data and update the output area
-        ipcRenderer.on('interactiveCommandOutput', (event, data) => {
-            const output = document.getElementById('terminalOutput');
-            output.textContent += data;
-            output.scrollTop = output.scrollHeight; // Auto-scroll to the bottom
-        });
-
-        // Event listener for form submission
-        document.getElementById('commandForm').addEventListener('submit', function(event) {
-            event.preventDefault(); // Prevent default form submission behavior
-            const commandInput = document.getElementById('commandInput').value;
-            sendCommandToMain(commandInput); // Send the command to main process
-            document.getElementById('commandInput').value = ''; // Clear input field after submission
-        });
-    </script>
+        // Show the command in terminal output
+        const output = document.getElementById('terminalOutput');
+        output.textContent += command + '\n';
+        output.scrollTop = output.scrollHeight; // Auto-scroll to the bottom
+    };
+</script>
 </body>
 </html>
