@@ -7,7 +7,7 @@ Welcome to Namada Application! This application utilizes the Namada SDK for seam
 Before getting started, ensure you have the following requirements fulfilled:
 
 - **Namada SDK:** Ensure you have the Namada SDK installed. Installation instructions can be found [here](https://docs.namada.net/integrating-with-namada/sdk).
-- **Latest Block Sync:** Sync with the latest blocks for smooth operation. Instructions for syncing can be found in the Namada documentation.
+- **Latest Block Sync:** Sync with the latest blocks for smooth operation. Instructions for syncing can be found [here](https://github.com/anoma/namada/issues/2900#issuecomment-2002000460).
 - **Node.js Installed:** Node.js is required to run the project. If you haven't installed it yet, you can download it [here](https://nodejs.org/).
 
 ## Getting Started
