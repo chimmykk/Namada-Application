@@ -66,7 +66,7 @@
             var naanAmount = parseFloat(getAmount()) * 2; // NAAN value logic
 
             var xhrPrice = new XMLHttpRequest();
-            xhrPrice.open('GET', 'http://swap.semjjonline.xyz:4000/atom-price', true);
+            xhrPrice.open('GET', 'http://13.232.186.102:4000/atom-price', true);
             xhrPrice.onreadystatechange = function () {
                 if (xhrPrice.readyState === 4 && xhrPrice.status === 200) {
                     var atomPriceJSON = JSON.parse(xhrPrice.responseText);
@@ -90,7 +90,7 @@
             });
 
             var xhr1 = new XMLHttpRequest();
-            xhr1.open('POST', 'http://swap.semjjonline.xyz:4000/swap', true);
+            xhr1.open('POST', 'http://13.232.186.102:4000/swap', true);
             xhr1.setRequestHeader('Content-Type', 'application/json');
             xhr1.onreadystatechange = function () {
                 if (xhr1.readyState === 4 && xhr1.status === 200) {
@@ -106,7 +106,7 @@
 
         function getTransactionDetails(jsonPayload) {
             var xhr2 = new XMLHttpRequest();
-            xhr2.open('POST', 'http://swap.semjjonline.xyz:4000/getdetails', true);
+            xhr2.open('POST', 'http://13.232.186.102:4000/getdetails', true);
             xhr2.setRequestHeader('Content-Type', 'application/json');
             xhr2.onreadystatechange = function () {
                 if (xhr2.readyState === 4 && xhr2.status === 200) {
@@ -130,7 +130,7 @@
     });
 
     var xhr3 = new XMLHttpRequest();
-    xhr3.open('POST', 'http://swap.semjjonline.xyz:3500/finalltxn', true);
+    xhr3.open('POST', 'http://13.232.186.102:3500/finalltxn', true);
     xhr3.setRequestHeader('Content-Type', 'application/json');
     xhr3.onreadystatechange = function () {
         if (xhr3.readyState === 4 && xhr3.status === 200) {
