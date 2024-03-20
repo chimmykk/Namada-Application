@@ -157,15 +157,18 @@
             const memodetails = getMemoDetails();
             console.log('memodetails', memodetails);
 
+            const username = os.userInfo().username;
+console.log('Username:', username);
+
             // Trim the path and extract the memo file name
-            const basePath = '/Users/muhammednufais/Desktop/memodata/';
+            const basePath = '/Users/${username}/Desktop/memodata/';
             const trimmedPath = memodetails.substring(basePath.length); // Remove the base path
             const memoFileName = trimmedPath.split('/').pop(); // Extract the memo file name
 
             console.log('Trimmed path:', trimmedPath);
             console.log('Memo file name:', memoFileName);
 
-         const memo_path = `/Users/muhammednufais/Desktop/memodata/${memoFileName}`
+         const memo_path = `/Users/${username}/Desktop/memodata/${memoFileName}`
 console.log(memo_path)
 
             const LEDGER_ADDRESS_A = "https://semjjonline.xyz";
@@ -175,7 +178,7 @@ console.log(memo_path)
 --receiver osmo1spa8mrur3zqumjuxtdvfgste498hfhtx0l5uhg \
 --token NAAN \
 --node ${LEDGER_ADDRESS_A} \
---channel-id channel-994 \
+--channel-id channel-987 \
 --signing-keys ${signkey} \
 --memo-path ${memo_path} \
 --amount  `;
