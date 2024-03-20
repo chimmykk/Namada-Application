@@ -50,7 +50,7 @@
     <!-- Div for wallet operation buttons -->
     <div id="walletOperations">
       <button id="walletListButton" class="button-like">Wallet List</button>
-  
+      <button id="balancefetch" class="button-like">Balance </button>
       <button id="shieldedaction" class="button-like">Perform Shielded Action</button>
       <button id="creatnew" class="button-like">Create A Wallet</button>
       <button id="derivewallet" class="button-like">Derive a Wallet</button>
@@ -105,6 +105,10 @@
     // Add event listeners to navigate to different pages
     document.getElementById('existingwallet').addEventListener('click', () => {
       window.location.href = './existing-wallet.html';
+    });
+
+    document.getElementById('balancefetch').addEventListener('click', () => {
+      window.location.href = './balancefetch.html';
     });
     document.getElementById('creatnew').addEventListener('click', () => {
       window.location.href = './create-wallet1.html';
