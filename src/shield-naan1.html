@@ -177,20 +177,20 @@
     return keys.join('\n');
 }
 
-        // Function to set spending address in local storage
-        function setSpendingAddress(address) {
-            localStorage.setItem('spendingAddress', address);
-        }
+        // Function to set payment address in local storage
+        function setPaymentAddress(address) {
+    localStorage.setItem('paymentAddress', address);
+}
 
-        // Function to get spending address from local storage
-        function getSpendingAddress() {
-            return localStorage.getItem('spendingAddress');
-        }
+// Function to get payment address from local storage
+function getPaymentAddress() {
+    return localStorage.getItem('paymentAddress');
+}
 
-        // Function to clear spending address from local storage
-        function clearSpendingAddress() {
-            localStorage.removeItem('spendingAddress');
-        }
+// Function to clear payment address from local storage
+function clearPaymentAddress() {
+    localStorage.removeItem('paymentAddress');
+}
     </script>
 </body>
 </html>
