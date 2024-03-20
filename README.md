@@ -44,6 +44,8 @@ Follow these steps to get the project up and running on your local machine:
 ## Usage
 
 Once the application is running, you can access it like any regular application.
+![Alt Text](https://media.giphy.com/media/v1.Y2lkPTc5MGI3NjExNzVmaDNobjJuaGFieXZzdDd5ZTB2Z3J1OHY5eHpxZzFtYTh1aTNxaCZlcD12MV9pbnRlcm5hbF9naWZfYnlfaWQmY3Q9Zw/Ez71ycVZfCbXCJ2wWL/giphy.gif)
+
 
 ## Contributing
 
