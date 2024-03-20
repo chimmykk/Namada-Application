@@ -21,7 +21,7 @@ Follow these steps to get the project up and running on your local machine:
 
 2. **Install Dependencies:**
     ```bash
-    cd yourproject
+    cd yourproject/src
     npm install
     ```
 
