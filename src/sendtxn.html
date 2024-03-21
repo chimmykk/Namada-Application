@@ -155,9 +155,8 @@
             const spending_key_a =spendingAddress
            
             const memodetails = getMemoDetails();
-            console.log('memodetails', memodetails);
-
-            const username = os.userInfo().username;
+            console.log('memodetails', memodetails);const os = require('os'); // Import the 'os' module
+const username = os.userInfo().username;
 console.log('Username:', username);
 
             // Trim the path and extract the memo file name
