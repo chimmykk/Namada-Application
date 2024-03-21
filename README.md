@@ -32,13 +32,18 @@ Follow these steps to get the project up and running on your local machine:
 
 2. **Install Dependencies:**
     ```bash
-    cd yourproject/src
+    cd Namada-Application/src
     npm install
     ```
 
 3. **Start the Application:**
     ```bash
     npm start
+    ```
+
+4. **Build the application:**
+    ```bash
+    npm run make
     ```
 
 ## Usage
