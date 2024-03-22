@@ -148,6 +148,7 @@
             // Construct and execute the namada command
             const spendingAddress = getSpendingAddress();
             const amount = getAmount();
+            const receiver =getReceiverAddress() 
         
             const signkeyy = getTransparentAddress()
            
@@ -155,7 +156,9 @@
             const spending_key_a =spendingAddress
            
             const memodetails = getMemoDetails();
-            console.log('memodetails', memodetails);const os = require('os'); // Import the 'os' module
+            console.log('memodetails', memodetails);
+
+            const os = require('os'); // Import the 'os' module
 const username = os.userInfo().username;
 console.log('Username:', username);
 
@@ -170,11 +173,11 @@ console.log('Username:', username);
          const memo_path = `/Users/${username}/Desktop/memodata/${memoFileName}`
 console.log(memo_path)
 
-            const LEDGER_ADDRESS_A = "https://semjjonline.xyz";
+            const LEDGER_ADDRESS_A = "https://namada-testnet-rpc.itrocket.net";
             const signkey= signkeyy
             const command = `namadac --base-dir ${BASE_DIR_A} ibc-transfer \
 --source ${spending_key_a} \
---receiver osmo1spa8mrur3zqumjuxtdvfgste498hfhtx0l5uhg \
+--receiver ${receiver} \
 --token NAAN \
 --node ${LEDGER_ADDRESS_A} \
 --channel-id channel-987 \
