@@ -1,0 +1,193 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Enter your IBC channel</title>
+    <link href="./output.css" rel="stylesheet">
+
+    <style>
+        /* Styles for button and other elements */
+        body {
+            background-color: black;
+            color: yellow;
+        }
+
+        h1 {
+            text-align: center;
+        }
+
+        form {
+            text-align: center;
+            margin-top: 20px;
+        }
+
+        input[type="text"] {
+            padding: 8px;
+            border-radius: 5px;
+            border: 1px solid cyan;
+            width: 200px;
+            background: transparent;
+            color: cyan;
+            outline: none;
+            margin-bottom: 10px;
+        }
+
+        button[type="submit"], button#continueButton, button#sendCommandButton {
+            padding: 10px 20px;
+            background-color: yellow;
+            color: black;
+            border: none;
+            margin-bottom: 4px;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+
+        textarea {
+            width: 100%;
+            border: 1px solid cyan;
+            border-radius: 5px;
+            padding: 8px;
+            margin-top: 20px;
+            background-color: black;
+            color: cyan;
+            font-family: monospace; /* Ensure monospace font for terminal-like display */
+        }
+
+        #commandInput {
+            padding: 8px;
+            border-radius: 5px;
+            border: 1px solid cyan;
+            width: 80%;
+            background: transparent;
+            color: cyan;
+            outline: none;
+            margin-bottom: 10px;
+        }
+    </style>
+</head>
+<body>
+
+    <form id="ibcForm">
+
+        <input type="text" id="channelInput" value="Intiate Shielded IBC TXN">
+        <br>
+        <button type="submit">Broadcast Txn</button>
+    </form>
+
+    <!-- Add a textarea to display terminal output -->
+    <textarea id="terminalOutput" rows="10" cols="50" readonly></textarea>
+
+    <!-- Add a textbox for command input -->
+    
+    <p id="inputText">Input Amount here</p>
+    <input type="text" id="terminalInput" placeholder="Enter command">
+    <button id="submitCommand" onclick="updateText()">Send Command</button>
+    <br>
+    <button id="continueButton" onclick="continueNext()">Continue Next</button>
+    
+
+
+    <script src="./store.js"></script>
+    <script>
+        // Retrieve stored IBC channel
+        const ibcChannel = getIBCChannel();
+
+        // Set the default value of IBC channel to "channel-0" if not stored
+        function updateText() {
+    document.getElementById('inputText').textContent = 'Input your password, Please wait it may take some time to process';
+}
+
+        // Function to continue next if textarea has value
+        function continueNext() {
+            const terminalOutput = document.getElementById('terminalOutput').value;
+            if (terminalOutput.trim() !== '') {
+                window.location.href = "./exchangerate.html"; // Redirect to ind.html
+            } else {
+                alert('Please click fetch memo wait for the terminal output to appear.');
+            }
+        }
+
+        // IPC communication with the main process to receive terminal output
+        const { ipcRenderer } = require('electron');
+        ipcRenderer.on('terminalData', (event, data) => {
+            const output = document.getElementById('terminalOutput');
+            output.textContent += data;
+            output.scrollTop = output.scrollHeight; // Auto-scroll to the bottom
+        });
+
+        document.getElementById('submitCommand').addEventListener('click', () => {
+            const command = document.getElementById('terminalInput').value + '\n'; // Ensure newline to execute
+            if (command.trim() !== '') {
+                ipcRenderer.send('toTerminal', command);
+                document.getElementById('terminalInput').value = ''; // Clear input after sending
+            }
+        });
+
+        // Optionally, handle Enter key in the input box to submit command
+        document.getElementById('terminalInput').addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') {
+                e.preventDefault(); // Prevent form submission
+                document.getElementById('submitCommand').click();
+            }
+        });
+
+        // Form submission event listener
+        document.getElementById('ibcForm').addEventListener('submit', (event) => {
+            event.preventDefault(); // Prevent default form submission
+
+            // Get the entered IBC channel
+            const channelInput = document.getElementById('channelInput').value;
+
+            // Store the entered IBC channel
+   
+
+            // Log the stored IBC channel
+          
+
+            // Construct and execute the namada command
+            const spendingAddress = getSpendingAddress();
+            const amount = getAmount();
+        
+            const signkeyy = getTransparentAddress()
+           
+            const BASE_DIR_A = "$HOME/Library/'Application Support'/Namada";
+            const spending_key_a =spendingAddress
+           
+            const memodetails = getMemoDetails();
+            console.log('memodetails', memodetails);
+
+            const os = require('os'); // Import the 'os' module
+const username = os.userInfo().username;
+console.log('Username:', username);
+
+            // Trim the path and extract the memo file name
+            const basePath = '/Users/${username}/Desktop/memodata/';
+            const trimmedPath = memodetails.substring(basePath.length); // Remove the base path
+            const memoFileName = trimmedPath.split('/').pop(); // Extract the memo file name
+
+            console.log('Trimmed path:', trimmedPath);
+            console.log('Memo file name:', memoFileName);
+
+         const memo_path = `/Users/${username}/Desktop/memodata/${memoFileName}`
+console.log(memo_path)
+
+            const LEDGER_ADDRESS_A = "https://namada-testnet-rpc.itrocket.net";
+            const signkey= signkeyy
+            const command = `namadac --base-dir ${BASE_DIR_A} ibc-transfer \
+--source ${spending_key_a} \
+--receiver osmo1spa8mrur3zqumjuxtdvfgste498hfhtx0l5uhg \
+--token NAAN \
+--node ${LEDGER_ADDRESS_A} \
+--channel-id channel-987 \
+--signing-keys ${signkey} \
+--memo-path ${memo_path} \
+--amount  `;
+
+
+            // Communicate with the main process to execute the terminal command
+            ipcRenderer.send('toTerminal', command);
+        });
+    </script>
+</body>
+</html>
